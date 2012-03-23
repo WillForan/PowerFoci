@@ -1,6 +1,6 @@
 Explore differences in preprocessing pipelines
 
-	git@github.com:WillForan/PowerFoci.git
+	git clone git@github.com:WillForan/PowerFoci.git ./PowerFoci
 
 
 
