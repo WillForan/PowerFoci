@@ -1,6 +1,8 @@
 Explore differences in preprocessing pipelines
 
 	arnold:/Users/lncd/willscripts/PowerFoci
+	foranw@wallace:~/src/PowerFoci
+	foranw@reese:~/src/PowerFoci
 
 
 
