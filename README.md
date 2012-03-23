@@ -2,7 +2,7 @@ Explore differences in preprocessing pipelines
 
 # Visualize #
 see matlab/connectThres.m for colorized connections
-![Scrapped Pipeline vs bpregres](http://raw.github.com/WillForan/PowerFoci/master/matlab/scrapped.jpg)
+![Scrapped Pipeline vs bpregres](https://github.com/WillForan/PowerFoci/raw/master/matlab/scrapped.jpg)
 dashed circle is negative change. solid dot is positive change. Top 1% shown.
 
 # Cluster #
