@@ -18,12 +18,13 @@ for x=1:xsize;
       for z=1:zsize;
          v=brain(x,y,z);
          
-         if(                                  ...
-             prev~=v &&                       ... % there must be a change
-              (                               ...
-                isempty(p) ||                 ... % always take the first
-                pdist([x y z;p(end,:)]) > 15  ... % skip if too close
-              )                               ...
+         if(                                   ...
+             prev~=v &&                          ... % there must be a change
+              (                                 ...
+                isempty(p) ||                   ... % always take the first
+                (pdist([x y z;p(end,:)]) > 20   ... % skip if too close
+                 || max([x y z] - p(end,:) > 10))... % in any dim
+              )                                 ...
             )
             p = [p; x y z];
             prev=v;
@@ -43,9 +44,9 @@ p = p .* 2;
 
 % and then recenter
 %  assume dimensions are symetric
-%  and the mean should be zero
+%  and the meadian value should be zero
 for dim=1:3
-    p(:,dim) = p(:,dim)  - mean( p(:,dim) );
+    p(:,dim) = p(:,dim)  - median( p(:,dim) );
 end
 
 
