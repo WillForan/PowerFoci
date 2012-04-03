@@ -38,4 +38,5 @@ see `generateFoci.sh` for generating color and foci file to be imported into car
 
 
 # Visiualize Foci in AFNI 
+![Pipeline Clustering in AFNI](https://github.com/WillForan/PowerFoci/raw/master/withAFNI/pipelines_afni.png)
 see `withAFNI/createSpheres.sh` for generating sheres.
