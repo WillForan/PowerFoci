@@ -64,6 +64,8 @@ for t=1:length(type)
     colorbar;
 
     colorstep=(deltRmax-deltRmin)/length(colorspectrum);
+
+    RRdRFile = fopen('roiRoiDeltRFile.txt','w');
     %% for each of the top 1%
     for i=absTop'
         %% get the row and col
@@ -95,6 +97,7 @@ for t=1:length(type)
         coloridx = floor( (abs(lowerTri(i)) - deltRmin)/colorstep);
         if coloridx < 1; coloridx=1; end
         set(l,'Color', colorspectrum(coloridx,:));
+
         
         % change marker and style based on corrilation direction
         if(lowerTri(i) > 0 );
@@ -103,6 +106,8 @@ for t=1:length(type)
            set(l,'LineStyle','--','Marker','o');
         end
         
+        %% make list of roi-roi deltR 
+        fprintf(RRdRFile,'%i %i %f\n', col, row, lowerTri(i));
         
         %% build matrix for euclid dist graph
         
