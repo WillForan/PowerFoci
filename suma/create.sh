@@ -18,7 +18,7 @@ doFile="spheres.1D.niml.do"
 [ -r $oneD ] || awk -F, '($1>=0){print $1,$2,$3}' $coordsFile > $oneD
 
 # find closests nodes
-if [ ! -r $prefix.closest.1D.dset ]; then
+if [ ! -r $prefix.closest.1D.dset -o ! -r node_coord.1D ]; then
    SurfaceMetrics        \
      -closest_node $oneD \
      -prefix $prefix     \
@@ -27,9 +27,19 @@ if [ ! -r $prefix.closest.1D.dset ]; then
 
     echo -n "MEAN/STD: "
     awk '($2 ~ /[0-9]+$/){sum+=$2; sumsq+=$2*$2;count++} END {print sum/count, sqrt(sumsq/count - (sum/count)**2)}' $prefix.closest.1D.dset
+
+    # combine first part of closest (node and dist) with coordinate file
+    # to get node dist xyz num(1..264) regClust robostClust scrapClust
+    sed -e 's/#.*//;/^$/d' $prefix.closest.1D.dset   | # remove comments
+     cut -f1-2                                       | # grab node and dist 
+     paste - ${coordsFile} | sed 'y/,/ /'            | # combined node dist with coord and clust
+     cat > node_coord.1D                               # record
 fi
 
-for pipeline in {reg,robust,scrap}; do
+# for each pipeline
+# create a nilm file where nodes are colored based on their cluster
+none=1 #color to use for none -- 1st in file
+for pipeline in {none,reg,robust,scrap}; do
    # write niml header
    cat  > $pipeline.$doFile << EOF
    <nido_head
@@ -40,19 +50,12 @@ for pipeline in {reg,robust,scrap}; do
 EOF
 
    # create sphere for each node
-   #   combine first part of closest (node) with coordinate file
-   #   to get node xyz num(1..264) regClust robostClust scrapClust
    #   add sphere with color uniq to cluster (14 clusters, rgbScale has 19 colors)
    #   only look at xyz's that are close to their node (with 4)
-   #   from 264 -> 127 (left hem) -> 86 (near a node)
-   sed -e 's/#.*//;/^$/d' $prefix.closest.1D.dset   | # remove comments
-    cut -f1-2                                       | # grab node and dist 
-    paste - ${coordsFile} | sed 'y/,/ /'            | # combined node dist with coord and clust
-    tee node_coord.1D                               | # record
-    awk '{dist=$2<0?-$2:$2; if(dist<4) {print $0}}' | # only take close nodes
+    awk '{dist=$2<0?-$2:$2; if(dist<4) {print $0}}' node_coord.1D | # only take close nodes
     while read node dist x y z nr reg robust scrap; do
       color=$(perl -slane "print if \$.==int(${!pipeline}*19/14)" rgbScale.txt)
-      echo $pipeline ${!pipeline} $color
+      #echo $pipeline ${!pipeline} $color
       cat >> $pipeline.$doFile  << EOF
       <S
       node = '$node'
