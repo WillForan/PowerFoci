@@ -65,7 +65,7 @@ for t=1:length(type)
 
     colorstep=(deltRmax-deltRmin)/length(colorspectrum);
 
-    RRdRFile = fopen('roiRoiDeltRFile.txt','w');
+    RRdRFile = fopen(['roiRoiDeltR_regVS',type{t},'.txt'],'w');
     %% for each of the top 1%
     for i=absTop'
         %% get the row and col
