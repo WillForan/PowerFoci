@@ -21,8 +21,13 @@ pipe.simult.Scrapped =  adj_simult_scrapped;
 
 
 % What graphs to calc/show
-pipes = {'bpregs' 'simult'   'Diff'};
-type  = {'Robust'  'Scrapped' 'Diff'};
+ pipes = {'bpregs' 'simult'   'Diff'};
+ type  = {'Robust'  'Scrapped' 'Diff'};
+%pipes = {'Diff'};
+%type  = {'Robust'  'Scrapped' 'Diff'};
+
+
+
 
 % What percent of data?
 percent=1;
@@ -78,7 +83,7 @@ for p=1:length(pipes);
 
         %% set up plot
         % with all roi coors in black
-        figure;
+        brainfig=figure;
         axis([-90,90,-90,90,-90,90]);
         plot3(bb264coordinate(:,1),bb264coordinate(:,2),bb264coordinate(:,3),'k.')
         hold on;
@@ -102,6 +107,8 @@ for p=1:length(pipes);
         colorstep=(deltRmax-deltRmin)/length(colorspectrum);
 
         RRdRFile = fopen(['roiRoiDeltR_' pipeA methA 'VS' pipeB methA,'.txt'],'w');
+        
+        nodecount = zeros(264,2); % used to record biggest nodes
         %% for each of the top 1%
         for i=absTop'
             %% get the row and col
@@ -109,9 +116,16 @@ for p=1:length(pipes);
             col = mod(i,msize);
             if col==0; col = msize; end
 
+            %% add to count and sum for both rois assocated
+            for c=[row,col]
+             nodecount(c,1) = nodecount(c,1) + 1;
+             nodecount(c,2) = nodecount(c,2) + lowerTri(i);
+            end
+            
             %% get corresponding coordinates
             cor1 = bb264coordinate(row,1:3);
             cor2 = bb264coordinate(col,1:3);
+                        
             linecors=[cor1;cor2];
 
             %% plot line
@@ -160,19 +174,38 @@ for p=1:length(pipes);
         %% give a title and label
         title( [pipeA ':' methA ' - ' pipeB ':' methB] );
         xlabel('x');ylabel('y');zlabel('z');
+        hgexport(brainfig, ['imgs/deltr_' pipeA methA '_' pipeB methB]);
 
         %% save distances for eculd dist graph
         dist.(type{t})      = distance;
         threeDist.(type{t}) = threeDistance;
+        
+        %% mention the top nodes
+        for idx=[1] %1-count 2-gives accumulated corrilation change
+          [val,sortidx] = sort(nodecount(:,idx), 'descend');
+          
+          %print comparison and top nodes
+          disp([pipeA ':' methA ' - ' pipeB ':' methB]);
+          disp([sortidx(1:15),val(1:15),bb264coordinate(sortidx(1:15),1:3)]);
 
+           if (idx==1)
+              histfig=figure;
+              hist(val);
+              title(['Instances ROI assocated with top ' num2str(percent) '% of \Delta r ('  pipeA methA 'vs' pipeB methB ')']);
+              xlabel('connections to other top nodes');
+              ylabel('count');
+              hgexport(histfig,['imgs/hist_' pipeA methA '_' pipeB methB]);
+           end
+        end
+        
 
     end
     
     %%%% plot euclian distance
-    figure
+    distfig=figure;
     colors={'ko','bx','r.'}; %black circle and blue x
     title([pipeA ':' pipeB ' Top ',num2str(percent),'% \Delta r against distance']);
-    axis([-.2,.2,0,180]);
+    %axis([-.2,.2,0,180]);
     xlabel('\Delta r'); ylabel('euclidian dist');
     hold on;
 
@@ -181,6 +214,8 @@ for p=1:length(pipes);
         plot(distance(:,1),distance(:,2),colors{t});
     end
     legend(type{1:length(type)},'Location','NorthEastOutside');
+    hgexport(brainfig, ['imgs/dist_' pipeA methA '_' pipeB methB]);
+    
 end
 
 
