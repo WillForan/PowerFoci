@@ -5,10 +5,20 @@
 %%%%
 
 
-%% pull in ajd_bpreg* and bb265coordinate
+%% pull in ajd_bpreg* adj_simult* and bb265coordinate
 if (~ exist('bb264coordinate', 'var') )
     load adjmat_stats
 end
+
+%% build distance matrix -- twice the computation as necessary :(
+msize = length(bb264coordinate);
+coorDists = zeros(msize,msize);
+for i = 1:msize
+    for j = 1:msize
+        coorDists(i,j) = pdist([bb264coordinate(i,2:4); bb264coordinate(j,2:4)]);
+    end
+end
+
 
 %% set up an object so the bpreg types can be loop
 pipe.bpregs.Normal    = adj_bpreg;
@@ -32,7 +42,7 @@ pipe.simult.Scrapped =  adj_simult_scrapped;
 % What percent of data?
 percent=1;
 
-%% for all pipes
+%% for all pipelines
 for p=1:length(pipes);
     %% for both Robust and Scrapped
     for t=1:length(type)
@@ -73,13 +83,21 @@ for p=1:length(pipes);
 
         % bpregs.(type{1}) is the adj matrix for the given type
         % this size should be the same as bb256cords, 264
-        msize = length( pipe.(pipeB).(methB) );
+        %msize = length( pipe.(pipeB).(methB) );%defined earlier now
 
 
         %% get the top $percent% 
         [~,absort] = sort( abs( lowerTri(:) ) );
         absTop     = absort(end-ceil(percent*end/100):end);
-
+        
+        %% distance hist
+        disthistfig=figure;
+        hist(coorDists(absTop));
+        title(['Distance bewteen top ' num2str(percent) '% of \Delta r ROIs ('  pipeA methA 'vs' pipeB methB ')']);
+        xlabel('distance');
+        ylabel('count');
+        hgexport(disthistfig,['imgs/distHist_' pipeA methA '_' pipeB methB]);
+         
 
         %% set up plot
         % with all roi coors in black
@@ -106,7 +124,7 @@ for p=1:length(pipes);
 
         colorstep=(deltRmax-deltRmin)/length(colorspectrum);
 
-        RRdRFile = fopen(['roiRoiDeltR_' pipeA methA 'VS' pipeB methA,'.txt'],'w');
+        RRdRFile = fopen(['txt/roiRoiDeltR_' pipeA methA 'VS' pipeB methA,'.txt'],'w');
         
         nodecount = zeros(264,2); % used to record biggest nodes
         %% for each of the top 1%
@@ -156,6 +174,7 @@ for p=1:length(pipes);
 
             %% build matrix for euclid dist graph
 
+            % this is a redudant calculation now -- could use coorDist
             distance(c,:)      = [lowerTri(i),pdist(linecors)];
 
             threeDistance(c,:) = [       ...
