@@ -27,4 +27,4 @@ echo "### blue (-) -> white (0) ->  red (+) "
 newSuma vis/roiRoiDeltR_bpregsNormalVSsimultNormal.1D.do
 
    echo "###	delt r: normal vs robust (bpreg)"; 
-newSuma vis/roiRoiDeltR_bpregsNormalVSbpregsRobust.1D.do
+newSuma vis/roiRoiDeltR_bpregsNormalVSbpregsScrapped.1D.do
