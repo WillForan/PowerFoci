@@ -28,16 +28,20 @@ close $nodeCoor;
 
 # read in colors
 #
-my @color=();
-open my $colorFile, 'colors/rgbWhiteRed.spec' or die "cannot open 'rgbWhiteRed.spec': $!\n";
-while (<$colorFile>) {
-
- next unless m/#(.{2})(.{2})(.{2})/;
- 
- # make 0-1 rgb
- push @color, [map {(hex $_)/256} ($1,$2,$3) ];
+my %color=();
+my $numColors;
+# for colors white to xxxx
+for my $colorfile ('Blue','Red') {
+   open my $colorFile, "colors/rgbWhite$colorfile.spec" or die "cannot open 'rgbWhite$colorfile.spec': $!\n";
+   while (<$colorFile>) {
+    next unless m/#(.{2})(.{2})(.{2})/;
+    # push hex converted to rgb 0->1 => hash{blue|red}= ([1 1 0], [.5 .5 .5], ...)
+    push @{$color{$colorfile}}, [map {(hex $_)/256} ($1,$2,$3) ];
+   }
+   close $colorFile;
+   # numColors to use is min of colors in either file
+   $numColors = $#{$color{$colorfile}} if (!$numColors || $numColors > $#{$color{$colorfile}});
 }
-close $colorFile;
 
 
 # what are the changes in corrilation?
@@ -85,13 +89,17 @@ for my $RRdRfile (glob('../matlab/txt/*txt')){
 
 
    # set step  
-   my $colorstep = ($max-$min)/$#color;
+   my $colorstep = ($max-$min)/$numColors;
 
    #draw the line
    for my $cor (@deltRs) {
+    # red is positive, blue is negative
+    my $sign='Red';
+    $sign='Blue' if $cor->[2] < 0;
+
     my $coloridx = int((abs($cor->[2])-$min)/$colorstep);
-    $coloridx-- if $coloridx > $#color;
-    my @rgb = @{$color[ $coloridx  ]};
+    $coloridx-- if $coloridx > $numColors;
+    my @rgb = @{@{$color{$sign}}[ $coloridx  ]};
     print $output join(" ",@{$cor}[0,1], @rgb, 1),"\n";
    }
    close $output;

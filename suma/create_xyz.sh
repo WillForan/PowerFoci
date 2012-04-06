@@ -33,7 +33,7 @@ EOF
       coord = '$x $y $z'
       coord_type = 'fixed'
       col = '$color'
-      rad = '3'
+      rad = '1'
       line_width = '1.5'
       style = 'fill'
       stacks = '20'
