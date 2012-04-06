@@ -1,10 +1,15 @@
 # SUMA visualize  #
 
-* R_bspregs - R_simult for normal
-* R_normal - R_scrapped for bpreg 
-
-![BetweenPipeline](https://github.com/WillForan/PowerFoci/raw/master/suma/pics/betweenPipe-rotate.gif)
-![Within Pipeline](https://github.com/WillForan/PowerFoci/raw/master/suma/pics/withinPipe-rotate.gif)
+<table><tr><td>
+ Between pipelines: R_bpreg - R_simult for normal
+ </td><td>
+ Within pipeline: R_normal - R_scrapped for bpreg </td></tr>
+ <tr><td>
+ <img src="https://github.com/WillForan/PowerFoci/raw/master/suma/pics/betweenPipe-rotate.gif">
+ </td><td>
+ <img src="https://github.com/WillForan/PowerFoci/raw/master/suma/pics/withinPipe-rotate.gif">
+ </td></tr>
+</table>
 ## view.sh ##
 
 brings up two suma windows 
