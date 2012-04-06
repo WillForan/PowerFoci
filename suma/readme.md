@@ -1,6 +1,6 @@
-= SUMA  =
+# SUMA  #
 
-== view.sh ==
+## view.sh ##
 
 brings up two suma windows 
 * delt r: bpregs vs simult (Normal)  
@@ -12,7 +12,7 @@ viewing
 
 suma cortical surface is from the specfile `suma_mni/N27_both.spec`
 
-== create*.sh ==
+## create*.sh ##
 
 uses roi from Power et al: `../b264_bp_robust_scrapped.txt`. Clustered from Kai''s matlab output
 
@@ -21,7 +21,7 @@ uses roi from Power et al: `../b264_bp_robust_scrapped.txt`. Clustered from Kai'
         * `viewMatchMismatch_do.sh` to visualize 
     * use create_xyz.sh instead, but cannot change views (e.g. flat)
 
-== segments*.pl ==
+## segments*.pl ##
 
 * pulls from `../matlab/txt/*txt`, the text ouptut of `../matlab/connectThres.m` (top 1%)
 * further restrict to only 300 top corrilation changes
