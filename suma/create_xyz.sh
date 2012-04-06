@@ -9,7 +9,7 @@ doFile="all_coor.spheres.1D.niml.do"
 
 # for each pipeline
 # create a nilm file where nodes are colored based on their cluster
-none=1 #color to use for none -- 1st in file
+none=10 #color to use for none -- 1st in file
 for pipeline in {none,reg,robust,scrap}; do
    # write niml header
    cat  > vis/$pipeline.$doFile << EOF

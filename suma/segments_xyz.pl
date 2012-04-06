@@ -48,6 +48,9 @@ for my $colorfile ('Blue','Red') {
 #
 
 for my $RRdRfile (glob('../matlab/txt/*txt')){
+#for my $RRdRfile (qw"vis/roiRoiDeltR_bpregsNormalVSsimultNormal.1D.do vis/roiRoiDeltR_bpregsNormalVSbpregsRobust.1D.do"){
+
+
 
    my ($max,$min) = (0,100);
    #my (%min, %max);
@@ -58,7 +61,7 @@ for my $RRdRfile (glob('../matlab/txt/*txt')){
    $name =~ s/txt$/1D.do/;
 
    open my $output, ">vis/$name" or die "cannot open '>vis/$name': $!\n";
-   print $output "#oriented_segments\n";
+   print $output "#segments\n";
    my @deltRs = ();
    open my $RRdR, $RRdRfile or die "cannot open $RRdRfile: $!\n";
    while (<$RRdR>) {
@@ -82,17 +85,33 @@ for my $RRdRfile (glob('../matlab/txt/*txt')){
     #my $sign = $dr>0?'+':'-';
     #$max{$sign}=$dr if $dr > $max{$sign};
     #$min{$sign}=$dr if $dr < $min{$sign};
-    $dr = $dr;
+    $dr = abs($dr);
     $max = $dr if $dr > $max; 
     $min = $dr if $dr < $min; 
    }
 
 
+
+
+   ###############
+   # only take top of the top
+   my @topDelts = sort {abs($b->[2]) <=> abs($a->[2])} @deltRs[0..299];
+   # get new max and min
+   $min = 100;
+   $max = 0;
+   for(map {$_->[2]} @topDelts){
+      my $dr=abs($_);
+      $max = $dr if $dr > $max;
+      $min = $dr if $dr < $min;
+   }
+   print "$name\t$min $max\n";
+   ################
+
    # set step  
    my $colorstep = ($max-$min)/$numColors;
 
    #draw the line
-   for my $cor (@deltRs) {
+   for my $cor (@topDelts) {
     # red is positive, blue is negative
     my $sign='Red';
     $sign='Blue' if $cor->[2] < 0;
