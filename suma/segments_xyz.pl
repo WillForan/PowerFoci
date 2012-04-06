@@ -98,7 +98,7 @@ for my $RRdRfile (glob('../matlab/txt/*txt')){
     $sign='Blue' if $cor->[2] < 0;
 
     my $coloridx = int((abs($cor->[2])-$min)/$colorstep);
-    $coloridx-- if $coloridx > $numColors;
+    $coloridx=$numColors if $coloridx > $numColors;
     my @rgb = @{@{$color{$sign}}[ $coloridx  ]};
     print $output join(" ",@{$cor}[0,1], @rgb, 1),"\n";
    }
