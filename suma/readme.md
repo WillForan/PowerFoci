@@ -1,12 +1,19 @@
-# SUMA  #
+# SUMA visualize  #
 
+* R_bspregs - R_simult for normal
+* R_normal - R_scrapped for bpreg 
+
+![BetweenPipeline](https://github.com/WillForan/PowerFoci/raw/master/suma/pics/betweenPipe-rotate.gif)
+![Within Pipeline](https://github.com/WillForan/PowerFoci/raw/master/suma/pics/withinPipe-rotate.gif)
 ## view.sh ##
 
 brings up two suma windows 
+
 * delt r: bpregs vs simult (Normal)  
 * delt r: normal vs scrapped (bpreg) 
 
 viewing
+
 * `vis/*do` segments created from `../matlab/txt/*txt` in form of `roi1 roi2 deltaR` by `segments_xyz.pl`
 * and nodes from `create_xyz.sh`
 
