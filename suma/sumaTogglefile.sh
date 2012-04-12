@@ -24,7 +24,6 @@ No arguments? Try ./ for current dir
 ***" 1>&2 && helper
 
 
-temp=$(mktemp)
 # get all files matching input + empty
 files=( $(ls -1 $1) empty)
 # count of all files+empty so exit can be the last thing
@@ -36,6 +35,9 @@ last=${#files[@]}
 # is suma running?
 specFile=/home/foranw/src/PowerFoci/suma/suma_mni/N27_both.spec
 [ -z "$(pgrep suma)" ] && xterm -e "suma -spec $specFile -niml" &
+
+#make the temp file and store it's location
+temp=$(mktemp)
 
 # while the universe exists
 while : ; do
