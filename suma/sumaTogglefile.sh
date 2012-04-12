@@ -11,7 +11,7 @@
 #
 # * make reused temp file 
 # * list files matching DOwildcard
-# * allow replacing/loading Displayable Objects Files
+# * replace/load selected Displayable Objects file
 #
 ##END
 function helper { 
@@ -31,7 +31,7 @@ files=( $(ls -1 $1) empty)
 last=${#files[@]}
 
 # can we do anything?
-[ $last -lt 2 ] && echo "No files matched $1." && helper && exit
+[ $last -lt 2 ] && echo "No files matched $1." && helper
  
 # is suma running?
 specFile=/home/foranw/src/PowerFoci/suma/suma_mni/N27_both.spec
