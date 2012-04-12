@@ -19,8 +19,10 @@ function helper {
  exit 
 }
 
-[ -z "$1" ] && echo -e "***
-No arguments? Try ./ for current dir
+[ -z "$1" -o -n "$2" ] && echo -e "***
+Bad arguments? Try ./ for current dir
+make sure *,{},etc are trapped/escaped (e.g '*DO' not just *DO)
+if matching two globs, but both in same quote pair
 ***" 1>&2 && helper
 
 
