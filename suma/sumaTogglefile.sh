@@ -1,16 +1,28 @@
 #!/usr/bin/env bash
 
 ##
-# make common temp file to replace load Displayable Objects in suma
+#  
+# USEAGE: sumaTogglefile.sh  <'*.do.1D'>
+#    e.g. ./sumaTogglefile.sh 'vis/*.do.D1'
+# 
+#    first argument is glob/wildcard 
+#    matching files to toggle in suma
+# 
 #
-# first argument is glob/wildcard matching files to toggle in suma
-##
+# * make reused temp file 
+# * list files matching DOwildcard
+# * allow replacing/loading Displayable Objects Files
+#
+##END
+function helper { 
+ sed -n 's/# //p;/##END/q' $0;
+ exit 
+}
 
-[ -z "$1" ] && echo "No arguments? I'll list current folder, is that what you want?"
+[ -z "$1" ] && echo -e "***
+No arguments? Try ./ for current dir
+***" 1>&2 && helper
 
-# is suma running?
-specFile=/home/foranw/src/PowerFoci/suma/suma_mni/N27_both.spec
-[ -z "$(pgrep suma)" ] && xterm -e "suma -spec $specFile -niml" &
 
 temp=$(mktemp)
 # get all files matching input + empty
@@ -19,7 +31,11 @@ files=( $(ls -1 $1) empty)
 last=${#files[@]}
 
 # can we do anything?
-[ $last -lt 2 ] && echo "No files matched $1." && exit
+[ $last -lt 2 ] && echo "No files matched $1." && helper && exit
+ 
+# is suma running?
+specFile=/home/foranw/src/PowerFoci/suma/suma_mni/N27_both.spec
+[ -z "$(pgrep suma)" ] && xterm -e "suma -spec $specFile -niml" &
 
 # while the universe exists
 while : ; do
