@@ -7,6 +7,9 @@
 # 
 #    first argument is glob/wildcard 
 #    matching files to toggle in suma
+#    
+#    to use a spefile
+#    specFile=my.spec ./sumaTogglefile.sh
 # 
 #
 # * make reused temp file 
@@ -22,13 +25,13 @@ function helper {
 [ -z "$1" -o -n "$2" ] && echo -e "***
 Bad arguments? Try ./ for current dir
 make sure *,{},etc are trapped/escaped (e.g '*DO' not just *DO)
-if matching two globs, but both in same quote pair
+if matching two globs, put both in same quote pair ('*DO *do')
 ***" 1>&2 && helper
 
 
 # make path absolute
 glob="$1"
-[[ "$glob" =~ /^\// ]] || $glob="$(pwd)/$1"
+[[ "$glob" =~ "^\/" ]] || glob="$(pwd)/$1"
 
 # get all files matching input + empty
 files=( $(ls -1 $1) empty)
@@ -38,12 +41,14 @@ last=${#files[@]}
 # can we do anything?
 [ $last -lt 2 ] && echo "No files matched $1." && helper
  
-# is suma running?
-specFile=/home/foranw/src/PowerFoci/suma/suma_mni/N27_both.spec
-[ -z "$(pgrep suma)" ] && xterm -e "suma -spec $specFile -niml" &
+# specilfe not set? set it
+[ -z "$specFile" ] && specFile=~/src/PowerFoci/suma/suma_mni/N27_both.spec
+
+# can we tell if suma is running, is it running?
+[ -n "$(which pgrep)"  ] && [ -z "$(pgrep suma)" ] && xterm -e "suma -spec $specFile -niml" &
 
 #make the temp file and store it's location
-temp=$(mktemp)
+temp=".tmp$(mktemp XX)"
 
 # while the universe exists
 while : ; do
