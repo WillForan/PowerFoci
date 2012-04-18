@@ -25,12 +25,13 @@ getopts('n:r:t:p:m:M:h',\%opts);
 
 if (exists $opts{h} || !exists $opts{r}) {
  print <<HERE;
-$0 -n ROI (nodes) e.g ../matrix/bb244_coordinate  ($opts{n})
+$0 
    -r relationship (adj list or matrix)
    -t how many segmants to show (top) ($opts{t})
    -p output prefix ($opts{p})
    -m min dist of connection  ($opts{m})
    -M max dist of connection  ($opts{M})
+   -n ROI (nodes) e.g ../matrix/bb244_coordinate  ($opts{n})
 
 ROI node file delm. by [,\\s]+
 determines matrix or adj by first line being more than 3 columns
