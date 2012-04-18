@@ -1,6 +1,7 @@
 # Viewing coorilation changes
 
-need
+need:
+
 * list of xyz coordinates of ROIs with ROI id (for adjacency list) (expect delm. [,\s]+)
     * bb244
     * bb264
