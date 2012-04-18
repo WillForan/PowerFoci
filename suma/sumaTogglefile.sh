@@ -48,7 +48,7 @@ last=${#files[@]}
 [ -n "$(which pgrep)"  ] && [ -z "$(pgrep suma)" ] && xterm -e "suma -spec $specFile -niml" &
 
 #make the temp file and store it's location
-temp=".tmp$(mktemp XXX)"
+temp="$(mktemp .tmpXXX)"
 
 # while the universe exists
 while : ; do
@@ -66,7 +66,7 @@ while : ; do
 
    # assume trying to copy empty is going to fail 
    # or that empty is actually an empty file
-   cp -f "${files[$response]}" "$temp" || echo -e "#spheres\n0 0 0 0 0 0 0" > $temp
+   cp -f "${files[$response]}" "$temp" 2>/dev/null || echo -e "#spheres\n0 0 0 0 0 0 0" > $temp
 
    # load the temp file in display
    DriveSuma -echo_edu -com viewer_cont -load_do "$temp"
