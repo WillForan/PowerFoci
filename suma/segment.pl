@@ -13,7 +13,7 @@ my %opts=(n=>'../matrix/bb264_bp_robust_scrapped.txt', # node file
           m=>'0',                          # min distance
           M=>'200');                       # max distance
 
-getopts('n:r:t:m:M:h',\%opts);
+getopts('n:r:t:p:m:M:h',\%opts);
 ######
 # 
 #  o make hash from node_coord file   { roi# -> node }

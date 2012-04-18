@@ -1,8 +1,12 @@
 # Viewing coorilation changes
+## Example
+    ./segment.pl -r ../matrix/top30Low.adjlist -t 600 -m 30 -M 70 -p vis/30Low
+    ./sumaTogglefile.sh 'vis/30*'
+    [select number referencing 'vis/30Low-T600Dm30M70.dset.do']
 
-need:
 
-* list of xyz coordinates of ROIs with ROI id (for adjacency list) (expect delm. [,\s]+)
+## Requires
+* list of xyz coordinates of ROIs with ROI id (for adjacency list) (orderd x y z roiID, expect delm. [,\s]+ )
     * bb244
     * bb264
 * change in correlation between ROIs as matrix or adjacency list
