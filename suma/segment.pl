@@ -13,25 +13,35 @@ my %opts=(n=>'../matrix/bb264_bp_robust_scrapped.txt', # node file
           m=>'0',                          # min distance
           M=>'200');                       # max distance
 
-getopts('n:r:t:p:m:M:h',\%opts);
+getopts('n:r:t:T:p:m:M:s:S:c:C:hd',\%opts);
 ######
 # 
 #  o make hash from node_coord file   { roi# -> node }
 #
 #  o write line segments node -> node if roi# mapping exists
 #  o colorize based on deltaR
-#
+# 
 #####
+if ( exists $opts{T} && $opts{T} >1 ) { print "-T percent should be <= 1\n"; exit }
+if ( $opts{t} < 1 ) { print "-t > 1 and an int\n"; exit }
 
 if (exists $opts{h} || !exists $opts{r}) {
  print <<HERE;
 $0 
    -r relationship (adj list or matrix)
    -t how many segmants to show (top) ($opts{t})
+   -T percent segments to keep (precedence over -t)
    -p output prefix ($opts{p})
    -m min dist of connection  ($opts{m})
    -M max dist of connection  ($opts{M})
    -n ROI (nodes) e.g ../matrix/bb244_coordinate  ($opts{n})
+   -s spectrum min corr (default unset)
+   -S spectrum max corr (default unset)
+   -c corr min          (default unset)
+   -C corr max          (default unset)
+   -d display  write to temp file [.tmp* must already exist]
+               and do suma thing
+   -h help
 
 ROI node file delm. by [,\\s]+
 determines matrix or adj by first line being more than 3 columns
@@ -58,10 +68,11 @@ my %roiXYZ;
 my $OutOfRange=0;
 my $isAdj=0;
 
-# eclid dist function
+# euclid dist function
+# also checks corr range if given
 sub getDist {
- my ($n1,$n2) = @_;
- ## get eclidian dist between cors (stored as space delm. in n{1,2})
+ my ($n1,$n2,$dr) = @_;
+ ## get euclidean dist between cors (stored as space delm. in n{1,2})
  my @xyz; my $edist=0;
  # get cords
  push @xyz, [split /\s/,$_ ] for ($n1,$n2);
@@ -72,7 +83,11 @@ sub getDist {
 
  $stat->add_data($edist); 
  #  min <= dist <= max 
- unless($edist >= $opts{m} && $edist <= $opts{M}) {  $OutOfRange++;  return}
+ unless( $opts{m} <= $edist && $edist <= $opts{M}) {  $OutOfRange++;  return}
+
+ # min <= corr <= max
+ if( exists $opts{c} && $dr <= $opts{c}) {  $OutOfRange++;  return}
+ if( exists $opts{C} && $dr >= $opts{C}) {  $OutOfRange++;  return}
 
  return $edist;
 
@@ -120,12 +135,19 @@ for my $colorfile ('Blue','Red') {
 }
 
 
-# what are the changes in corrilation?
+# what are the changes in correlation?
 #
 my ($max,$min) = (0,100);
 
 # set up output file
-my $filename="$opts{p}-T$opts{t}Dm$opts{m}M$opts{M}.dset.do";
+# if we want percent, put that in filename - otherwise use num top
+my $fnt=(exists $opts{"T"})?"$opts{T}p":"$opts{t}";
+my $filename="$opts{p}-T${fnt}Dm$opts{m}M$opts{M}";
+# add any other defined options
+for (qw/c C s S/){ $filename.="$_$opts{$_}" if exists $opts{$_} }
+# add file extension
+$filename.=".dset.do";
+
 open my $output, ">$filename" or die "cannot open '>$filename..': $!\n";
 print $output "#segments\n";
 
@@ -154,7 +176,7 @@ sub readMatrix {
 
      ## store corrilation
      # maybe something bad happens if distance == 0, shouldn't happend anyway
-     my $edist = getDist($n1,$n2);
+     my $edist = getDist($n1,$n2,$dr);
      push @deltRs, [$n1,$n2,$dr,$edist] if $edist;
 
     }
@@ -177,7 +199,7 @@ sub readAdjList {
     next if (!$n1 or !$n2);
 
     # store corrilation
-    my $edist=getDist($n1,$n2);
+    my $edist=getDist($n1,$n2,$dr);
     push @deltRs, [$n1,$n2,$dr,$edist] if $edist;
    }
 }
@@ -206,17 +228,24 @@ print join ("\t", "$opts{m}-$opts{M}", $stat->count, map {sprintf "%.3f",$_}
 ###############
 # only take top of the top
 # set listmax to the number of comparisons if less than what is specified as -t on cli
+# or use percent, percent takes precedence
+$opts{t} = int($opts{T}*$#deltRs) if exists $opts{T};
 my $listmax=$#deltRs<$opts{t}?$#deltRs:$opts{t}-1;
 
 my @topDelts = sort { abs($b->[2])<=>abs($a->[2]) } @deltRs[0..$listmax];
-# get new max and min
-$min = 100;
-$max = 0;
+
+## get new max and min for color spectrum calculation
+$min = 100; $max = 0;
 for(map {$_->[2]} @topDelts){
    my $dr=abs($_);
    $max = $dr if $dr > $max;
    $min = $dr if $dr < $min;
 }
+
+# undo all that work if we have spectrum max/mins
+$max = $opts{S} if exists $opts{S};
+$min = $opts{s} if exists $opts{s};
+
 print "Top $opts{t} Rmin Rmax $min $max\n";
 ################
 
@@ -238,8 +267,17 @@ for my $cor (@topDelts) {
  my @rgb = @{@{$color{$sign}}[ $coloridx  ]};
 
  # print endpoints (both cords) color (r g b) and width
- print $output join(" ",@{$cor}[0,1], @rgb, .5),"\n";
+ print $output join(" ",@{$cor}[0,1], @rgb, .1),"\n";
 }
 
 close $output;
 print "DriveSuma -echo_edu -com viewer_cont -load_do $filename\n";
+my $cmd=<<CMDEND;
+set +x
+f=\$(ls -tlc .tmp* 2>/dev/null|sed 1q); 
+[ -n "\$f" ] && cp "$filename" \$f \\
+ && DriveSuma -echo_edu -com viewer_cont -load_do "$f"   
+CMDEND
+
+print $cmd, "\n";
+system("bash -c \"$cmd\"") if exists $opts{d};

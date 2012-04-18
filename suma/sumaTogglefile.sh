@@ -41,12 +41,11 @@ last=${#files[@]}
 # can we do anything?
 [ $last -lt 2 ] && echo "No files matched $1." && helper
  
-# specilfe not set? set it
-[ -z "$specFile" ] && specFile=~/src/PowerFoci/suma/suma_mni/N27_both.spec
+# specfile not set? set it
+[ -z "$specFile" ] && specFile=~/standard/suma_mni/N27_both.spec
 
 # run suma if it's not already running
 [ -z "$(ps x -o command | grep ^suma)" ] && xterm -e "suma -spec $specFile -niml" &
-#xterm -e "suma -spec $specFile -niml" &
 
 #make the temp file and store it's location
 temp="$(mktemp .tmpXXX)"
@@ -60,14 +59,20 @@ while : ; do
    # enumerate files
    count=0
    for f in ${files[*]} "exit"; do 
-     echo -e "$count:\t$f";
+     echo -e "$count:\t$f"|sed "s:$(pwd)/::";
      let count++
    done
 
    # prompt and capture file choice
    echo -n "reponse: "; read response
-   # stop if choose exit, or bad input (e.g. error in numeric compare, number too big )
-   [ $response -lt $last ] || break
+
+   # handle choice oddnes
+   [ -z "$response" ] && break                                        # ctrl-d
+   [ "$response" -ge 0 -o "$response" -lt 0 2>&-  ] 2>&- || continue  # not a number 
+   [ $response -eq $last ] && break                                   # stop if choose exit 
+   [ $response -gt $last -o $response -lt 0 ] && \
+     echo "oops? $response not in range!"     && \
+     sleep 1 && continue                                              # number is too big or too small
 
    # assume trying to copy empty is going to fail 
    # or that empty is actually an empty file
