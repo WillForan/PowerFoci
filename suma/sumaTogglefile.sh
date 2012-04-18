@@ -34,7 +34,7 @@ glob="$1"
 [[ "$glob" =~ "^\/" ]] || glob="$(pwd)/$1"
 
 # get all files matching input + empty
-files=( $(ls -1 $1) empty)
+files=( $(ls -1 $glob) empty)
 # count of all files+empty so exit can be the last thing
 last=${#files[@]}
 
@@ -44,14 +44,19 @@ last=${#files[@]}
 # specilfe not set? set it
 [ -z "$specFile" ] && specFile=~/src/PowerFoci/suma/suma_mni/N27_both.spec
 
-# can we tell if suma is running, is it running?
-[ -n "$(which pgrep)"  ] && [ -z "$(pgrep suma)" ] && xterm -e "suma -spec $specFile -niml" &
+# run suma if it's not already running
+[ -z "$(ps x -o command | grep ^suma)" ] && xterm -e "suma -spec $specFile -niml" &
+#xterm -e "suma -spec $specFile -niml" &
 
 #make the temp file and store it's location
 temp="$(mktemp .tmpXXX)"
 
 # while the universe exists
 while : ; do
+   # redo file list every new selection attempt
+   files=( $(ls -1 $glob) empty)
+   last=${#files[@]}
+
    # enumerate files
    count=0
    for f in ${files[*]} "exit"; do 
