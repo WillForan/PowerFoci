@@ -273,11 +273,9 @@ for my $cor (@topDelts) {
 close $output;
 print "DriveSuma -echo_edu -com viewer_cont -load_do $filename\n";
 my $cmd=<<CMDEND;
-set +x
-f=\$(ls -tlc .tmp* 2>/dev/null|sed 1q); 
-[ -n "\$f" ] && cp "$filename" \$f \\
- && DriveSuma -echo_edu -com viewer_cont -load_do "$f"   
+f=\$(ls -tc .tmp* 2>/dev/null|sed 1q); 
+[ -n "\$f" ] && cp "$filename" "\$f" \\
+ && DriveSuma -echo_edu -com viewer_cont -load_do "\$f"   
 CMDEND
 
-print $cmd, "\n";
-system("bash -c \"$cmd\"") if exists $opts{d};
+system("$cmd") if exists $opts{d};
