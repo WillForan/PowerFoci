@@ -48,7 +48,7 @@ last=${#files[@]}
 [ -n "$(which pgrep)"  ] && [ -z "$(pgrep suma)" ] && xterm -e "suma -spec $specFile -niml" &
 
 #make the temp file and store it's location
-temp=".tmp$(mktemp XX)"
+temp=".tmp$(mktemp XXX)"
 
 # while the universe exists
 while : ; do
