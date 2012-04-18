@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-#use Getopt::Std;
+use Getopt::Std;
 #use v5.14;
 
 ######
@@ -17,9 +17,14 @@ use warnings;
 # all ROIs
 #
 
+my %opts=(n=>'../b264_bp_robust_scrapped.txt', # node file
+          r=>'../matlab/txt/*txt');            # relationship (adjlist) file matching glob
+
+getopts('n:r:',\%opts);
+
 my %roiNode;
 my %roiXYZ;
-open my $nodeCoor, '../b264_bp_robust_scrapped.txt' or die "cannot open node_coord.1D: $!\n";
+open my $nodeCoor, $opts{n} or die "cannot open $opts{n}: $!\n";
 while(<$nodeCoor>){
  my ($x,$y,$z,$roiNum) = (split /,/)[0..2,3];
  $roiXYZ{$roiNum}="$x $y $z";
@@ -47,7 +52,7 @@ for my $colorfile ('Blue','Red') {
 # what are the changes in corrilation?
 #
 
-for my $RRdRfile (glob('../matlab/txt/*txt')){
+for my $RRdRfile (glob($opts{r})){
 #for my $RRdRfile (qw"vis/roiRoiDeltR_bpregsNormalVSsimultNormal.1D.do vis/roiRoiDeltR_bpregsNormalVSbpregsRobust.1D.do"){
 
 
@@ -58,7 +63,7 @@ for my $RRdRfile (glob('../matlab/txt/*txt')){
    
    # what do we call our do file
    my $name = (split /\//, $RRdRfile)[-1];
-   $name =~ s/txt$/1D.do/;
+   $name =~ s/(\.txt)?$/.1D.do/;
 
    open my $output, ">vis/$name" or die "cannot open '>vis/$name': $!\n";
    print $output "#segments\n";
@@ -119,7 +124,7 @@ for my $RRdRfile (glob('../matlab/txt/*txt')){
     my $coloridx = int((abs($cor->[2])-$min)/$colorstep);
     $coloridx=$numColors if $coloridx > $numColors;
     my @rgb = @{@{$color{$sign}}[ $coloridx  ]};
-    print $output join(" ",@{$cor}[0,1], @rgb, 1),"\n";
+    print $output join(" ",@{$cor}[0,1], @rgb, .1),"\n";
    }
    close $output;
    print "DriveSuma -echo_edu -com viewer_cont -load_do vis/$name\n";

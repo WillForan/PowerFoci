@@ -26,6 +26,10 @@ if matching two globs, but both in same quote pair
 ***" 1>&2 && helper
 
 
+# make path absolute
+glob="$1"
+[[ "$glob" =~ /^\// ]] || $glob="$(pwd)/$1"
+
 # get all files matching input + empty
 files=( $(ls -1 $1) empty)
 # count of all files+empty so exit can be the last thing

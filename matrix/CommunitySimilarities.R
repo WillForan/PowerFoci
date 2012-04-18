@@ -1,9 +1,11 @@
 ###
 #community detection similarity code
-setwd(file.path(getMainDir(), "rs-fcMRI_Motion"))
+#setwd(file.path(getMainDir(), "rs-fcMRI_Motion"))
 
-communities <- read.table("CommunityDetection.txt", header=FALSE, col.names=c("roiNum", "reg", "robust", "scrapped"))
-assignments <- communities[,2:4]
+communities <- read.table("bb244_communities_bpreg_simult.csv", header=FALSE, col.names=c("x","y","z","roiNum", "bpreg", "simult"),sep=",")
+assignments <- communities[,5:6]
+
+assignments
 
 pipelineROIMatch <- list()
 for (col in names(assignments)) {
@@ -24,7 +26,7 @@ library(plyr)
 combs <- combinations(length(pipelineROIMatch), 2)
 
 phiResults <- list()
-for (p in combs) {
+for (p in 1) {
   p1 <- names(pipelineROIMatch)[combs[p,1]]
   p2 <- names(pipelineROIMatch)[combs[p,2]]
   
@@ -33,6 +35,7 @@ for (p in combs) {
   p1cat <- pipelineROIMatch[[p1]]
   p2cat <- pipelineROIMatch[[p2]]
   
+
   corMat <- matrix(NA_real_, nrow=ncol(p1cat), ncol=ncol(p2cat))
   rownames(corMat) <- paste(p1, "_", names(p1cat), sep="")
   colnames(corMat) <- paste(p2, "_", names(p2cat), sep="")
