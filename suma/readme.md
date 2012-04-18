@@ -1,3 +1,22 @@
+# Viewing coorilation changes
+
+need
+* list of xyz coordinates of ROIs with ROI id (for adjacency list) (expect delm. [,\s]+)
+    * bb244
+    * bb264
+* change in correlation between ROIs as matrix or adjacency list
+    * ../matrix/top30Low.adjlist
+
+## segment.pl
+* (-r) provide adjacency list or matrix files and optionally number of segments (-t), min r (-m), and/or max r (-M)
+* writes to vis/compare...
+
+## sumaTogglefile.sh 'vis/*'
+* open suma 
+* list menu with all files in vis
+* display chosen item
+
+
 # SUMA visualize  #
 
 <table><tr><td>
@@ -10,7 +29,7 @@
  <img src="https://github.com/WillForan/PowerFoci/raw/master/suma/pics/withinPipe-rotate.gif">
  </td></tr>
 </table>
-## view.sh ##
+## old/view.sh ##
 
 brings up two suma windows 
 
@@ -33,7 +52,7 @@ uses roi from Power et al: `../b264_bp_robust_scrapped.txt`. Clustered from Kai'
         * `viewMatchMismatch_do.sh` to visualize 
     * use create_xyz.sh instead, but cannot change views (e.g. flat)
 
-## segments*.pl ##
+## old/segments*.pl ##
 
 * pulls from `../matlab/txt/*txt`, the text ouptut of `../matlab/connectThres.m` (top 1%)
 * further restrict to only 300 top corrilation changes
