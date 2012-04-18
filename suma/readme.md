@@ -6,6 +6,7 @@ need
     * bb264
 * change in correlation between ROIs as matrix or adjacency list
     * ../matrix/top30Low.adjlist
+    * ../matlab/txt/*.txt
 
 ## segment.pl
 * (-r) provide adjacency list or matrix files and optionally number of segments (-t), min r (-m), and/or max r (-M)
