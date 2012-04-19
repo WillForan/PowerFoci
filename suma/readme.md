@@ -4,6 +4,8 @@
     ./sumaTogglefile.sh 'vis/30*'
     [select number referencing 'vis/30Low-T600Dm30M70.dset.do']
 
+with `sumaTogglefile.sh` still running, using `./segment.pl ... -d` will replace suma DOs with the newly created file.
+
 
 ## Requires
 * list of xyz coordinates of ROIs with ROI id (for adjacency list) (orderd x y z roiID, expect delm. [,\s]+ )
