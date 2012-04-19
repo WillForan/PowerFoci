@@ -273,7 +273,8 @@ for my $cor (@topDelts) {
 }
 
 close $output;
-print "DriveSuma -echo_edu -com viewer_cont -load_do $filename\n";
+print "DriveSuma -echo_edu -com viewer_cont -load_do $filename\n" unless exists $opts{d};
+
 my $cmd=<<CMDEND;
 f=\$(ls -tc .tmp* 2>/dev/null|sed 1q); 
 [ -n "\$f" ] && cp "$filename" "\$f" \\
