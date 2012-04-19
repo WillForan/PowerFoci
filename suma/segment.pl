@@ -124,8 +124,9 @@ close $nodeCoor;
 my %color=();
 my $numColors;
 # for colors white to xxxx
-for my $colorfile ('Blue','Red') {
-   open my $colorFile, "colors/rgbWhite$colorfile.spec" or die "cannot open 'rgbWhite$colorfile.spec': $!\n";
+#for my $colorfile ('WhiteBlue','WhiteRed') {
+for my $colorfile ('WhiteBlue','RedYellow') {
+   open my $colorFile, "colors/rgb$colorfile.spec" or die "cannot open 'rgb$colorfile.spec': $!\n";
    while (<$colorFile>) {
     next unless m/#(.{2})(.{2})(.{2})/;
     # push hex converted to rgb 0->1 => hash{blue|red}= ([1 1 0], [.5 .5 .5], ...)
@@ -257,8 +258,8 @@ my $colorstep = ($max-$min)/$numColors;
 #draw the line
 for my $cor (@topDelts) {
  # red is positive, blue is negative
- my $sign='Red';
- $sign='Blue' if $cor->[2] < 0;
+ my $sign='RedYellow';
+ $sign='WhiteBlue' if $cor->[2] < 0;
 
  ## set color
  # delta-min/steps ==> where in spectrum value is

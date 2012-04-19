@@ -68,7 +68,7 @@ for (comp in 1:length(phiResults)) {
 sink("CommunitySimilarities.txt")
 print(lapply(phiResults, "[[", "ordCorr"))
 sink()
-
+rbind(as.vector(phiResults$bpreg <- vs <- simult$ordCorr$c.target), as.vector(phiResults$bpreg <- vs <- simult$ordCorr$match1))
 #from psych
 #library(psych)
 #      corMat[i,j] <- phi(table(p1cat[[iname]], p2cat[[jname]]))
