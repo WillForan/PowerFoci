@@ -244,7 +244,7 @@ for(map {$_->[2]} @topDelts){
    $min = $dr if $dr < $min;
 }
 
-print "Top $#topDelts Rmin Rmax $min $max\n";
+print "Top ", $#topDelts+1, " Rmin Rmax $min $max\n";
 
 # undo all that work if we have spectrum max/mins
 $max = $opts{S} if exists $opts{S};
