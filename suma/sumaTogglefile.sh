@@ -29,12 +29,12 @@ if matching two globs, put both in same quote pair ('*DO *do')
 ***" 1>&2 && helper
 
 
-# make path absolute
-glob="$1"
-[[ "$glob" =~ "^\/" ]] || glob="$(pwd)/$1"
+# make path absolute glob after dir will still mess it up (e.g. if vis/, vis* won't work)
+path=$1; [ -d "$path" ] && path="$path/*"
+append=""; [[ "$path" =~ ^/ ]] || append="$(pwd)/"  
 
 # get all files matching input + empty
-files=( $(ls -1 $glob) empty)
+files=($(ls -1 $path) empty)
 # count of all files+empty so exit can be the last thing
 last=${#files[@]}
 
@@ -53,7 +53,7 @@ temp="$(mktemp .tmpXXX.niml.do)"
 # while the universe exists
 while : ; do
    # redo file list every new selection attempt
-   files=( $(ls -1 $glob) empty)
+   files=($(ls -1 $path|sed -e "s:^:$append:") empty)
    last=${#files[@]}
 
    # enumerate files
