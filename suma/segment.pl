@@ -11,9 +11,10 @@ my %opts=(n=>'../matrix/bb264_bp_robust_scrapped.txt', # node file
           t=>'300',                        # top ### of connections to consider
           p=>'vis/compare',                # output prefix
           m=>'0',                          # min distance
-          M=>'200');                       # max distance
+          M=>'200',                         # max distance
+          l=>'1');                         # line width
 
-getopts('n:r:t:T:p:m:M:s:S:c:C:hd',\%opts);
+getopts('n:r:t:T:p:m:M:s:S:c:C:l:hd',\%opts);
 ######
 # 
 #  o make hash from node_coord file   { roi# -> node }
@@ -35,10 +36,11 @@ $0
    -m min dist of connection  ($opts{m})
    -M max dist of connection  ($opts{M})
    -n ROI (nodes) e.g ../matrix/bb244_coordinate  ($opts{n})
-   -s spectrum min corr (default unset)
-   -S spectrum max corr (default unset)
+   -s spectrum min corr (default unset, min of displayed data)
+   -S spectrum max corr (default unset, max of displayed data)
    -c corr min          (default unset)
    -C corr max          (default unset)
+   -l line width        ($opts{l})
    -d display  write to temp file [.tmp* must already exist]
                and do suma thing
    -h help
@@ -242,11 +244,11 @@ for(map {$_->[2]} @topDelts){
    $min = $dr if $dr < $min;
 }
 
+print "Top $#topDelts Rmin Rmax $min $max\n";
+
 # undo all that work if we have spectrum max/mins
 $max = $opts{S} if exists $opts{S};
 $min = $opts{s} if exists $opts{s};
-
-print "Top $opts{t} Rmin Rmax $min $max\n";
 ################
 
 # set step  
@@ -266,8 +268,8 @@ for my $cor (@topDelts) {
  # get rgb given a color idx
  my @rgb = @{@{$color{$sign}}[ $coloridx  ]};
 
- # print endpoints (both cords) color (r g b) and width
- print $output join(" ",@{$cor}[0,1], @rgb, .1),"\n";
+ # print endpoints (both cords) color (r g b) opacity and width
+ print $output join(" ",@{$cor}[0,1], @rgb, 1, $opts{l}),"\n";
 }
 
 close $output;
