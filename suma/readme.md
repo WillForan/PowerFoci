@@ -1,4 +1,4 @@
-# Viewing coorilation changes
+# Viewing correlation changes
 ## Example
     ./segment.pl -r ../matrix/top30Low.adjlist -t 600 -m 30 -M 70 -p vis/30Low
     ./sumaTogglefile.sh 'vis/30*'
@@ -8,7 +8,7 @@ with `sumaTogglefile.sh` still running, using `./segment.pl ... -d` will replace
 
 
 ## Requires
-* list of xyz coordinates of ROIs with ROI id (for adjacency list) (orderd x y z roiID, expect delm. [,\s]+ )
+* list of xyz coordinates of ROIs with ROI id (for adjacency list) (ordered x y z roiID, expect delm. [,\s]+ )
     * bb244
     * bb264
 * change in correlation between ROIs as matrix or adjacency list
@@ -63,7 +63,7 @@ uses roi from Power et al: `../b264_bp_robust_scrapped.txt`. Clustered from Kai'
 ## old/segments*.pl ##
 
 * pulls from `../matlab/txt/*txt`, the text ouptut of `../matlab/connectThres.m` (top 1%)
-* further restrict to only 300 top corrilation changes
+* further restrict to only 300 top correlation changes
 * uses `colors/rgbWhite{Blue,Red}.spec` for ad-hoc spectrum
 
 
