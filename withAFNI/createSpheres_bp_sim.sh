@@ -6,7 +6,7 @@ for type in {5,6}; do
    esac
 
    3dUndump  -xyz -srad 7 -overwrite                          \
-             -prefix left_$name.nii.gz                        \
+             -prefix mask_${name}.nii.gz                      \
              -master mni_icbm152_t1_tal_nlin_asym_09c_2mm.nii \
              <(awk -F,  '{print $1,$2,$3,$'$type'}'           \
                         ../matrix/bb244_communities_bpreg_simult-corrected.csv)
