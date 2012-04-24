@@ -348,6 +348,8 @@ CMDEND
    print $output "<S coord='$_' coord_type='fixed' rad='1' />\n" for (keys %topnodes);
 
    close $output;
+   $filename =~ s/\.do/.spheres.niml.do/;
+   system("cp .tmpROISpheres.niml.do $filename");
    system("DriveSuma -echo_edu -com viewer_cont -load_do .tmpROISpheres.niml.do");
 } else {
 # don't want to display, but tell how to
