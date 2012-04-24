@@ -14,7 +14,7 @@ my %opts=(n=>'../matrix/bb264_bp_robust_scrapped.txt', # node file
           M=>'200',                         # max distance
           l=>'1');                         # line width
 
-getopts('n:r:t:T:p:m:M:s:S:c:C:l:hd',\%opts);
+getopts('n:r:t:T:p:m:M:s:S:c:C:l:hdx',\%opts);
 ######
 # 
 #  o make hash from node_coord file   { roi# -> node }
@@ -31,18 +31,19 @@ if (exists $opts{h} || !exists $opts{r}) {
 $0 
    -r relationship (adj list or matrix)
    -t how many segmants to show (top) ($opts{t})
-   -T percent segments to keep (precedence over -t)
+   -T percent (as .1 for 10%) segments to keep (precedence over -t)
    -p output prefix ($opts{p})
    -m min dist of connection  ($opts{m})
    -M max dist of connection  ($opts{M})
    -n ROI (nodes) e.g ../matrix/bb244_coordinate  ($opts{n})
-   -s spectrum min corr (default unset, min of displayed data)
-   -S spectrum max corr (default unset, max of displayed data)
+   -s spectrum min corr (default min of data; vals <= will be same color)
+   -S spectrum max corr (default max of data; vals >= will be same color)
    -c corr min          (default unset)
    -C corr max          (default unset)
    -l line width        ($opts{l})
-   -d display  write to temp file [.tmp* must already exist]
-               and do suma thing
+   -d display           write to temp file [.tmp* must already exist]
+                        and do suma thing
+   -x debug
    -h help
 
 ROI node file delm. by [,\\s]+
@@ -101,7 +102,7 @@ sub getDist {
 open my $RRdR, $opts{r} or die "cannot open $opts{r}: $!\n";
 $_=<$RRdR>;
 $isAdj = 1 if scalar(split/\s/)<4;
-print STDERR "Adj? $isAdj\n";
+print "Adj? $isAdj\n" if exists $opts{x};
 close $RRdR;
 
 # find node coordinates
@@ -157,31 +158,23 @@ print $output "#segments\n";
 my @deltRs = ();
 
 # read in file
-open $RRdR, $opts{r} or die "cannot open $opts{r}: $!\n";
+
+my @adjList=();
+
 ##### READ MATRIX
 sub readMatrix {
    while (<$RRdR>) {
     next if $.<2; # no information in first line that's not elsewhere
     chomp;
     my @row= split;
-    my $n1=$roiXYZ{$.};
-    #exists
-    if(!$n1) { print STDERR "$.: not in roi range skipping row\n"; next}
+    my $r1=$.;
 
-    for (0..$.-2) {
-     my $r2=$_+1; # roi's are one based
-     my $dr=$row[$_];
-     my $n2=$roiXYZ{$r2};
-     # have node?
-     if(!$n2) { print STDERR "$r2: not in roi range, skipping column\n"; next}
-      
+    for my $col (0..$.-2) {
+     my $r2=$col+1; # roi's are one based
+     my $dr=$row[$col];
 
-
-     ## store corrilation
-     # maybe something bad happens if distance == 0, shouldn't happend anyway
-     my $edist = getDist($n1,$n2,$dr);
-     push @deltRs, [$n1,$n2,$dr,$edist] if $edist;
-
+     # add to adjList
+     push @adjList, [$r1,$r2,$dr];
     }
    }
 }
@@ -190,52 +183,56 @@ sub readAdjList {
    while (<$RRdR>) {
     chomp;
     my ($r1,$r2, $dr) = split;
-    # what is the node for the roi
-    #my $n1 = $roiNode{$r1};
-    #my $n2 = $roiNode{$r2};
-    my $n1 = $roiXYZ{$r1};
-    my $n2 = $roiXYZ{$r2};
-
-    # are the nodes visible?
-    print STDERR "$r1: not in rois/node_coord.1D\n" if !$n1;
-    print STDERR "$r2: not in rois/node_coord.1D\n" if !$n2;
-    next if (!$n1 or !$n2);
-
-    # store corrilation
-    my $edist=getDist($n1,$n2,$dr);
-    push @deltRs, [$n1,$n2,$dr,$edist] if $edist;
+    push @adjList, [$r1,$r2,$dr];
    }
 }
 
+
+# open the relationship file (matrix or adj list)
+open $RRdR, $opts{r} or die "cannot open $opts{r}: $!\n";
+
+# run one of the two read in functions
 if ($isAdj) { readAdjList }
 else        { readMatrix  }
+# and close the file
+close $RRdR;
 
-#### Stats #####
-print "$OutOfRange out of range\n";
+for my $rel (@adjList) {
+ # what is the node for the roi
+ #my $n1 = $roiNode{$r1};
+ #my $n2 = $roiNode{$r2};
+ my $n1 = $roiXYZ{$rel->[0]};
+ my $n2 = $roiXYZ{$rel->[1]};
+ my $dr = $rel->[2];
 
-print join ("\t", qw/set count max min mean std_dev variance/),"\n";
-print join ("\t", "all", $stat->count, map {sprintf "%.3f",$_} 
-                      ($stat->max, $stat->min, $stat->mean, 
-                       $stat->standard_deviation, $stat->variance)),"\n";
-#start again for only what is cept
-$stat = Statistics::Descriptive::Full->new();
-$stat->add_data(map {$_->[3]} @deltRs); 
+ #DEBUG: what nodes are we looking at
+ print "$rel->[0] $rel->[1] $dr\t$n1\t$n2\n" if(exists $opts{x});
 
-print join ("\t", "$opts{m}-$opts{M}", $stat->count, map {sprintf "%.3f",$_} 
-                      ($stat->max, $stat->min, $stat->mean, 
-                       $stat->standard_deviation, $stat->variance)),"\n";
+ # are the nodes visible?
+ print STDERR "$rel->[0]: not in rois/node_coord.1D\n" if !$n1;
+ print STDERR "$rel->[1]: not in rois/node_coord.1D\n" if !$n2;
+ next if (!$n1 or !$n2);
+
+
+ # store corrilation
+ my $edist=getDist($n1,$n2,$dr);
+ push @deltRs, [$n1,$n2,$dr,$edist] if $edist;
+}
 
 
 
 
 ###############
-# only take top of the top
+# first sort based on dr
+my @topDelts = sort { abs($b->[2])<=>abs($a->[2]) } @deltRs;
+
 # set listmax to the number of comparisons if less than what is specified as -t on cli
 # or use percent, percent takes precedence
 $opts{t} = int($opts{T}*$#deltRs) if exists $opts{T};
 my $listmax=$#deltRs<$opts{t}?$#deltRs:$opts{t}-1;
 
-my @topDelts = sort { abs($b->[2])<=>abs($a->[2]) } @deltRs[0..$listmax];
+# only take top of the top
+@topDelts=@topDelts[0..$listmax];
 
 ## get new max and min for color spectrum calculation
 $min = 100; $max = 0;
@@ -245,12 +242,51 @@ for(map {$_->[2]} @topDelts){
    $min = $dr if $dr < $min;
 }
 
-print "Top ", $#topDelts+1, " Rmin Rmax $min $max\n";
 
-# undo all that work if we have spectrum max/mins
+
+################
+#### Stats #####
+################
+
+sub getStats {
+ # get new stats if we have an array to wrok on
+ if (@_ != 0) {
+  $stat = Statistics::Descriptive::Full->new();
+  $stat->add_data(map {$_->[3]} @_); 
+ }
+
+ # count and map all stats to .3f
+ return  ($stat->count, 
+         map {sprintf "%.3f",$_}  
+           ($stat->max, $stat->min, $stat->mean, 
+            $stat->standard_deviation, $stat->variance
+           )
+         );
+}
+
+print "Distance\n",
+      join ("\t", qw/set count max min mean std_dev variance/),"\n",
+      join ("\t", "all"  , getStats()          ),"\n",
+      join ("\t", "excld", getStats(@deltRs)   ),"\n",
+      join ("\t", "Top"  , getStats(@topDelts) ),"\n";
+
+print "R\n",
+      join("\t", qw/Top min max/),"\n",
+      join("\t", $#topDelts+1, 
+                 map {sprintf "%.4f", $_} ($min, $max)
+          ),"\n";
+
+print "\nexcluded $OutOfRange based on range qualifications\n";
+
+
+#############
+# Colorize
+# and output
+#############
+
+# undo all the stats work if we have spectrum max/mins
 $max = $opts{S} if exists $opts{S};
 $min = $opts{s} if exists $opts{s};
-################
 
 # set step  
 my $colorstep = ($max-$min)/$numColors;
@@ -274,12 +310,25 @@ for my $cor (@topDelts) {
 }
 
 close $output;
-print "DriveSuma -echo_edu -com viewer_cont -load_do $filename\n" unless exists $opts{d};
 
-my $cmd=<<CMDEND;
-f=\$(ls -tc .tmp* 2>/dev/null|sed 1q); 
-[ -n "\$f" ] && cp "$filename" "\$f" \\
- && DriveSuma -echo_edu -com viewer_cont -load_do "\$f"   
+
+##################
+# Suma stuff
+#
+# want to display (using currently opened suma)
+if (exists $opts{d}) {
+
+   my $cmd=<<CMDEND;
+     f=\$(ls -tc .tmp* 2>/dev/null|sed 1q); 
+     [ -n "\$f" ] && cp "$filename" "\$f" \\
+     && DriveSuma -echo_edu -com viewer_cont -load_do "\$f"   
 CMDEND
 
-system("$cmd") if exists $opts{d};
+   system("$cmd");
+
+} else {
+# don't want to display, but tell how to
+
+   print "DriveSuma -echo_edu -com viewer_cont -load_do $filename\n";
+}
+
