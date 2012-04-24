@@ -34,18 +34,35 @@ path=$1; [ -d "$path" ] && path="$path/*"
 append=""; [[ "$path" =~ ^/ ]] || append="$(pwd)/"  
 
 # get all files matching input + empty
-files=($(ls -1 $path) empty)
+files=($(ls -1 $path) empty.1D empty.niml.do)
 # count of all files+empty so exit can be the last thing
 last=${#files[@]}
 
 # can we do anything?
 [ $last -lt 2 ] && echo "No files matched $1." && helper
  
-# specfile not set? set it
-[ -z "$specFile" ] && specFile=~/standard/suma_mni/N27_both.spec
+# specfile and subject volume not set? set it
+[ -z "$specFile" ] && specFile=~/standard/suma_mni/N27_both.spec          # ziad's
+#[ -z "$specFile" ] && specFile=~/standard/colin27/SUMA/colin27_both.spec # michael's
+echo using specfile $specFile
+
+# do we want to tie to afni?
+if [ -n "$AFNI" ]; then
+   # set nifti file
+   [ -z "$afniFile" ] && afniFile=~/standard/suma_mni/MNI_N27+tlrc # ziad's
+   #[ -z "$afniFile" ] && afniFile=~/standard/colin27/SUMA/brain.nii    # michael's
+   echo using afni $afniFile
+
+   # run suma linked to afni
+   additSuma="-sv $afniFile"
+
+   # run afni
+   xterm -e "afni -niml $afniFile" &
+fi
 
 # run suma if it's not already running
-[ -z "$(ps x -o command | grep ^suma)" ] && xterm -e "suma -spec $specFile -niml" &
+[ -z "$(ps x -o command | grep ^suma)" ] && xterm -e "suma -niml -spec $specFile $additSuma" & 
+# run afni?
 
 #make the temp file and store it's location
 temp="$(mktemp .tmpXXX.niml.do)"
@@ -53,7 +70,7 @@ temp="$(mktemp .tmpXXX.niml.do)"
 # while the universe exists
 while : ; do
    # redo file list every new selection attempt
-   files=($(ls -1 $path|sed -e "s:^:$append:") empty)
+   files=($(ls -1 $path|sed -e "s:^:$append:") empty.1D empty.niml.do)
    last=${#files[@]}
 
    # enumerate files
@@ -74,9 +91,17 @@ while : ; do
      echo "oops? $response not in range!"     && \
      sleep 1 && continue                                              # number is too big or too small
 
-   # assume trying to copy empty is going to fail 
-   # or that empty is actually an empty file
-   cp -f "${files[$response]}" "$temp" 2>/dev/null || echo -e "#spheres\n0 0 0 0 0 0 0" > $temp
+   # assume there aren't files named empty*
+   # or that empty is actually an empty file so it doesn't matter
+   case ${files[$response]} in 
+    empty.1D )
+      echo -e "#spheres\n0 0 0 0 0 0 0" > $temp ;;
+    empty.niml.do )
+      echo -e "<nido_head />" > $temp ;;
+    * )
+      #cp or make an empty.1D
+      cp -f "${files[$response]}" "$temp" 2>/dev/null || echo -e "#spheres\n0 0 0 0 0 0 0" > $temp
+   esac
 
    # load the temp file in display
    DriveSuma -echo_edu -com viewer_cont -load_do "$temp"
