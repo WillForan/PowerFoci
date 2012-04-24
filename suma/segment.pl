@@ -11,10 +11,11 @@ my %opts=(n=>'../matrix/bb264_bp_robust_scrapped.txt', # node file
           t=>'300',                        # top ### of connections to consider
           p=>'vis/compare',                # output prefix
           m=>'0',                          # min distance
-          M=>'200',                         # max distance
+          M=>'200',                        # max distance
+          H=>'lr',                         # hemisphere
           l=>'1');                         # line width
 
-getopts('n:r:t:T:p:m:M:s:S:c:C:l:hdx',\%opts);
+getopts('n:r:t:T:p:m:M:s:S:c:C:l:H:hdx',\%opts);
 ######
 # 
 #  o make hash from node_coord file   { roi# -> node }
@@ -35,6 +36,7 @@ $0
    -p output prefix ($opts{p})
    -m min dist of connection  ($opts{m})
    -M max dist of connection  ($opts{M})
+   -H hemisphere to keep {l,r,lr} ($opts{H})
    -n ROI (nodes) e.g ../matrix/bb244_coordinate  ($opts{n})
    -s spectrum min corr (default min of data; vals <= will be same color)
    -S spectrum max corr (default max of data; vals >= will be same color)
@@ -103,6 +105,7 @@ open my $RRdR, $opts{r} or die "cannot open $opts{r}: $!\n";
 $_=<$RRdR>;
 $isAdj = 1 if scalar(split/\s/)<4;
 print "Adj? $isAdj\n" if exists $opts{x};
+print "hem? $opts{H}\n" if exists $opts{x};
 close $RRdR;
 
 # find node coordinates
@@ -150,7 +153,7 @@ my $filename="$opts{p}-T${fnt}Dm$opts{m}M$opts{M}";
 # add any other defined options
 for (qw/c C s S/){ $filename.="$_$opts{$_}" if exists $opts{$_} }
 # add file extension
-$filename.=".dset.do";
+$filename.="$opts{H}.dset.do";
 
 open my $output, ">$filename" or die "cannot open '>$filename..': $!\n";
 print $output "#segments\n";
@@ -201,16 +204,21 @@ for my $rel (@adjList) {
  # what is the node for the roi
  #my $n1 = $roiNode{$r1};
  #my $n2 = $roiNode{$r2};
- my $n1 = $roiXYZ{$rel->[0]};
- my $n2 = $roiXYZ{$rel->[1]};
- my $dr = $rel->[2];
+ my ($r1,$r2,$dr) = @{$rel};
+ my $n1 = $roiXYZ{$r1};
+ my $n2 = $roiXYZ{$r2};
 
  #DEBUG: what nodes are we looking at
- print "$rel->[0] $rel->[1] $dr\t$n1\t$n2\n" if(exists $opts{x});
+ print "$r1 $r2 $dr\t$n1\t$n2\n" if(exists $opts{x});
 
+ # Hemisphere restriction
+ my $xcor1 =  (split /\s+/, $n1)[0]; my $xcor2 =  (split /\s+/, $n2)[0]; 
+ if( $opts{H} !~ /l/i && ( $xcor1 <= 0 || $xcor2 <= 0 ) ) { print "lost $n1<->$n2 to L\n" if $opts{x}; next }
+ if( $opts{H} !~ /r/i && ( $xcor1 >= 0 || $xcor2 >= 0 ) ) { print "lost $n1<->$n2 to R\n" if $opts{x}; next }
+ 
  # are the nodes visible?
- print STDERR "$rel->[0]: not in rois/node_coord.1D\n" if !$n1;
- print STDERR "$rel->[1]: not in rois/node_coord.1D\n" if !$n2;
+ print STDERR "$r1: not in rois/node_coord.1D\n" if !$n1;
+ print STDERR "$r2: not in rois/node_coord.1D\n" if !$n2;
  next if (!$n1 or !$n2);
 
 
