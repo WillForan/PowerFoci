@@ -316,8 +316,11 @@ for my $cor (@topDelts) {
  # print endpoints (both cords) color (r g b) opacity and width
  print $output join(" ",@{$cor}[0,1], @rgb, 1, $opts{l}),"\n";
 }
-
 close $output;
+
+
+
+
 
 
 ##################
@@ -334,6 +337,18 @@ CMDEND
 
    system("$cmd");
 
+   ## print nodes
+   # index nodes
+   my %topnodes;
+   for my $i (@topDelts) {
+    $topnodes{$i->[$_]}++ for (0,1);
+   }
+   open $output, ">.tmpROISpheres.niml.do" or die "cannot open '>.tmpROISpheres.niml.do': $!\n";
+   print $output "<nido_head default_color='1 1 1' />\n";
+   print $output "<S coord='$_' coord_type='fixed' rad='1' />\n" for (keys %topnodes);
+
+   close $output;
+   system("DriveSuma -echo_edu -com viewer_cont -load_do .tmpROISpheres.niml.do");
 } else {
 # don't want to display, but tell how to
 
