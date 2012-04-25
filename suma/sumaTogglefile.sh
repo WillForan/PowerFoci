@@ -95,12 +95,12 @@ while : ; do
    # or that empty is actually an empty file so it doesn't matter
    case ${files[$response]} in 
     empty.1D )
-      echo -e "#spheres\n0 0 0 0 0 0 0" > $temp ;;
+      echo -e "#segment\n87 -120 108 87 -120 108 0 0 0 0 0" > $temp ;;
     empty.niml.do )
       echo -e "<nido_head />" > $temp ;;
     * )
       #cp or make an empty.1D
-      cp -f "${files[$response]}" "$temp" 2>/dev/null || echo -e "#spheres\n0 0 0 0 0 0 0" > $temp
+      cp -f "${files[$response]}" "$temp" 2>/dev/null || echo -e "#segment\n87 -120 108 87 -120 108 0 0 0 0 0" > $temp
    esac
 
    # load the temp file in display
