@@ -330,7 +330,7 @@ print "\n";
 # create an SVG object
 open my $svgOut, ">$filename.svg" or die "cannot open svgout:$!\n";
 use SVG;
-my ($swidth, $sheight) = (200, 800);
+my ($swidth, $sheight) = (100, 200);
 my $svg  = SVG->new(width=>$swidth,height=>$sheight);
 my $step = $sheight/$numColors;
 my $spect = 'RedYellow';
@@ -338,12 +338,15 @@ for my $cidx (0.. $numColors-1){
 my $ypos = $cidx*$step;
 
 $svg->rectangle(
-      id=>"rect_$cidx", x=>0, width=>$swidth, y=>$ypos , height=>$step,
+      id=>"rect_$cidx", x=>40, width=>$swidth-40, y=>$ypos, height=>$step+1,
       'stroke'=>"none",
       'fill'=> "rgb(".join(',', map {$_*256} @{@{$color{$spect}}[$cidx]}).")"
       #'style' => 'stroke:none;fill:#ff0000;fill-opacity:1'
      );
-$svg->text( id=>"text_$cidx", x=>0,  y=>$ypos+$step )->cdata(sprintf "%.4f" , $min+$colorstep*$cidx);;
+#only show what value is top, middle, and bottom
+if ( $cidx == 0 || $cidx == $numColors-1 || $cidx == int(($numColors-1)/2) ) {
+   $svg->text( id=>"text_$cidx", x=>1,  y=> $ypos +($ypos>=$step?0:12) )->cdata(sprintf "%.4f" , $min+$colorstep*$cidx);
+}
 
 }
 print $svgOut $svg->xmlify;
