@@ -252,6 +252,37 @@ for(map {$_->[2]} @topDelts){
 
 
 
+#############
+# Colorize
+# and output
+#############
+
+# undo all the stats work if we have spectrum max/mins
+$max = $opts{S} if exists $opts{S};
+$min = $opts{s} if exists $opts{s};
+
+# set step  
+my $colorstep = ($max-$min)/$numColors;
+
+#draw the line
+for my $cor (@topDelts) {
+ # red is positive, blue is negative
+ my $sign='RedYellow';
+ $sign='WhiteBlue' if $cor->[2] < 0;
+
+ ## set color
+ # delta-min/steps ==> where in spectrum value is
+ my $coloridx = int((abs($cor->[2])-$min)/$colorstep);
+ # sometimes we go over
+ $coloridx=$numColors if $coloridx > $numColors;
+ # get rgb given a color idx
+ my @rgb = @{@{$color{$sign}}[ $coloridx  ]};
+
+ # print endpoints (both cords) color (r g b) opacity and width
+ print $output join(" ",@{$cor}[0,1], @rgb, 1, $opts{l}),"\n";
+}
+close $output;
+
 ################
 #### Stats #####
 ################
@@ -286,39 +317,37 @@ print "R\n",
 
 print "\nexcluded $OutOfRange based on range qualifications\n";
 
-
-#############
-# Colorize
-# and output
-#############
-
-# undo all the stats work if we have spectrum max/mins
-$max = $opts{S} if exists $opts{S};
-$min = $opts{s} if exists $opts{s};
-
-# set step  
-my $colorstep = ($max-$min)/$numColors;
-
-#draw the line
-for my $cor (@topDelts) {
- # red is positive, blue is negative
- my $sign='RedYellow';
- $sign='WhiteBlue' if $cor->[2] < 0;
-
- ## set color
- # delta-min/steps ==> where in spectrum value is
- my $coloridx = int((abs($cor->[2])-$min)/$colorstep);
- # sometimes we go over
- $coloridx=$numColors if $coloridx > $numColors;
- # get rgb given a color idx
- my @rgb = @{@{$color{$sign}}[ $coloridx  ]};
-
- # print endpoints (both cords) color (r g b) opacity and width
- print $output join(" ",@{$cor}[0,1], @rgb, 1, $opts{l}),"\n";
+print "\nColor\n";
+print "$numColors colors  [", join(":", map {sprintf "%.4f",$_} ($min,$colorstep,$max)), "]\n";
+for my $spect (qw/RedYellow WhiteBlue/) {
+ print "$spect ";
+ #print( (map { sprintf "%02x", $_*256 } @{@{$color{$spect}}[$_]})," ") for (0, $#{$color{$spect}});
+ print( (map { sprintf "%4i", $_*256 } @{@{$color{$spect}}[$_]})," ") for (0, $#{$color{$spect}});
+ print "\n";
 }
-close $output;
+print "\n";
 
+# create an SVG object
+open my $svgOut, ">$filename.svg" or die "cannot open svgout:$!\n";
+use SVG;
+my ($swidth, $sheight) = (200, 800);
+my $svg  = SVG->new(width=>$swidth,height=>$sheight);
+my $step = $sheight/$numColors;
+my $spect = 'RedYellow';
+for my $cidx (0.. $numColors-1){
+my $ypos = $cidx*$step;
 
+$svg->rectangle(
+      id=>"rect_$cidx", x=>0, width=>$swidth, y=>$ypos , height=>$step,
+      'stroke'=>"none",
+      'fill'=> "rgb(".join(',', map {$_*256} @{@{$color{$spect}}[$cidx]}).")"
+      #'style' => 'stroke:none;fill:#ff0000;fill-opacity:1'
+     );
+$svg->text( id=>"text_$cidx", x=>0,  y=>$ypos+$step )->cdata(sprintf "%.4f" , $min+$colorstep*$cidx);;
+
+}
+print $svgOut $svg->xmlify;
+close $svgOut;
 
 
 
