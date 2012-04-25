@@ -334,19 +334,19 @@ my ($swidth, $sheight) = (100, 200);
 my $svg  = SVG->new(width=>$swidth,height=>$sheight);
 my $step = $sheight/$numColors;
 my $spect = 'RedYellow';
-for my $cidx (reverse (0.. $numColors-1)){
-my $ypos = $cidx*$step;
+for my $cidx (0.. $numColors-1){
+   my $ypos = $sheight-$step-($cidx*$step);
 
-$svg->rectangle(
-      id=>"rect_$cidx", x=>40, width=>$swidth-40, y=>$ypos, height=>$step+1,
-      'stroke'=>"none",
-      'fill'=> "rgb(".join(',', map {$_*256} @{@{$color{$spect}}[$cidx]}).")"
-      #'style' => 'stroke:none;fill:#ff0000;fill-opacity:1'
-     );
-#only show what value is top, middle, and bottom
-if ( $cidx == 0 || $cidx == $numColors-1 || $cidx == int(($numColors-1)/2) ) {
-   $svg->text( id=>"text_$cidx", x=>1,  y=> $ypos +($ypos>=$step?0:12) )->cdata(sprintf "%.3f" , $min+$colorstep*$cidx);
-}
+   $svg->rectangle(
+         id=>"rect_$cidx", x=>40, width=>$swidth-40, y=>$ypos-1, height=>$step+1,
+         'stroke'=>"none",
+         'fill'=> "rgb(".join(',', map {$_*256} @{@{$color{$spect}}[$cidx]}).")"
+         #'style' => 'stroke:none;fill:#ff0000;fill-opacity:1'
+        );
+   #only show what value is top, middle, and bottom
+   if ( $cidx == 0 || $cidx == $numColors-1 || $cidx == int(($numColors-1)/2) ) {
+      $svg->text( id=>"text_$cidx", x=>1,  y=> $ypos +($ypos>=$step?0:12) )->cdata(sprintf "%.3f" , $min+$colorstep*$cidx);
+   }
 
 }
 print $svgOut $svg->xmlify;
