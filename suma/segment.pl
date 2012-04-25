@@ -334,7 +334,7 @@ my ($swidth, $sheight) = (100, 200);
 my $svg  = SVG->new(width=>$swidth,height=>$sheight);
 my $step = $sheight/$numColors;
 my $spect = 'RedYellow';
-for my $cidx (0.. $numColors-1){
+for my $cidx (reverse (0.. $numColors-1)){
 my $ypos = $cidx*$step;
 
 $svg->rectangle(
@@ -345,7 +345,7 @@ $svg->rectangle(
      );
 #only show what value is top, middle, and bottom
 if ( $cidx == 0 || $cidx == $numColors-1 || $cidx == int(($numColors-1)/2) ) {
-   $svg->text( id=>"text_$cidx", x=>1,  y=> $ypos +($ypos>=$step?0:12) )->cdata(sprintf "%.4f" , $min+$colorstep*$cidx);
+   $svg->text( id=>"text_$cidx", x=>1,  y=> $ypos +($ypos>=$step?0:12) )->cdata(sprintf "%.3f" , $min+$colorstep*$cidx);
 }
 
 }
